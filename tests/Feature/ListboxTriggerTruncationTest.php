@@ -39,6 +39,27 @@ test('listbox component uses shared trigger label truncation', function () {
         ->not->toContain('class="truncate" x-text="current"');
 });
 
+test('listboxes stay in their local Alpine scope by default', function () {
+    $component = file_get_contents(resource_path('views/components/forms/listbox.blade.php'));
+    $html = Blade::render('<x-forms.listbox id="region" :options="[]" :wire="false" />');
+
+    expect($component)->toContain("'portal' => false")
+        ->and($html)
+        ->toContain('x-data="{')
+        ->toContain('x-ref="panel"')
+        ->not->toContain('x-teleport="body"')
+        ->not->toContain('floatingDropdown(')
+        ->not->toContain('style="position: fixed');
+});
+
+test('mobile listbox panels stay anchored to their trigger', function () {
+    $css = file_get_contents(resource_path('css/app.css'));
+
+    expect($css)
+        ->not->toContain('.listbox-panel:not([style*="position: fixed"])')
+        ->not->toContain('transform: translate(-50%, -50%) !important;');
+});
+
 test('searchable listbox component uses shared trigger label truncation', function () {
     $html = Blade::render(<<<'BLADE'
         <x-forms.searchable-listbox id="tz" label="Timezone"
